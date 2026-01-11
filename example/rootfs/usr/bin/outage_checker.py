@@ -8,6 +8,7 @@ import time
 import json
 import logging
 import sys
+import os
 from bs4 import BeautifulSoup
 from datetime import datetime
 
@@ -35,6 +36,7 @@ class OutageChecker:
         self.check_interval = check_interval
         self.session = requests.Session()
         self.last_status = None
+        self.status_file = '/share/utility_outage_status.json'
         
     def check_outage(self):
         """Проверява за аварии на даден идентификатор"""
@@ -121,6 +123,29 @@ class OutageChecker:
         
         return status
     
+    def save_status_to_file(self, result):
+        """Записва статуса във файл за Home Assistant sensors"""
+        try:
+            status_data = {
+                'identifier': self.identifier,
+                'timestamp': datetime.now().isoformat(),
+                'has_outage': result['has_outage'] if result else None,
+                'outage_type': result['outage_type'] if result else 'Unknown',
+                'state': 'problem' if (result and result['has_outage']) else 'ok',
+                'details': result['details'] if result else [],
+                'last_check': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            }
+            
+            # Ensure directory exists
+            os.makedirs(os.path.dirname(self.status_file), exist_ok=True)
+            
+            with open(self.status_file, 'w', encoding='utf-8') as f:
+                json.dump(status_data, f, ensure_ascii=False, indent=2)
+            
+            logger.debug(f"Status saved to {self.status_file}")
+        except Exception as e:
+            logger.error(f"Error saving status to file / Грешка при запис на статус във файл: {e}")
+    
     def run(self):
         """Main loop for checking / Главен цикъл за проверка"""
         logger.info(f"Starting outage check for identifier / Стартиране на проверка за идентификатор: {self.identifier}")
@@ -130,6 +155,9 @@ class OutageChecker:
             try:
                 result = self.check_outage()
                 status = self.format_status(result)
+                
+                # Save status to file for Home Assistant sensors
+                self.save_status_to_file(result)
                 
                 # Check if status changed / Проверка дали статусът се е променил
                 if status != self.last_status:
