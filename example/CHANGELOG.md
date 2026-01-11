@@ -1,5 +1,11 @@
 <!-- https://developers.home-assistant.io/docs/add-ons/presentation#keeping-a-changelog -->
 
+## 1.1.4
+
+- Use only Alpine packages (no pip) for maximum stability
+- Simplified Dockerfile for reliable builds
+- All dependencies from system repositories
+
 ## 1.1.3
 
 - Fix beautifulsoup4 installation issue
