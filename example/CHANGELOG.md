@@ -1,4 +1,11 @@
 <!-- https://developers.home-assistant.io/docs/add-ons/presentation#keeping-a-changelog -->
+## 1.3.1
+
+- 🐛 Fixed binary sensor template syntax
+- ✅ Changed from `states.sensor.x.attributes.y` to `state_attr()` function
+- 📈 Improved template reliability and compatibility
+- 📝 Added details attribute to binary sensor
+
 ## 1.2.0
 
 - ⚡ Updated to modern Home Assistant template syntax

@@ -181,19 +181,21 @@ class OutageChecker:
 - binary_sensor:
     - name: "Авария на ток - {self.identifier}"
       device_class: problem
-      state: >
-        {{{{ states.sensor.utility_outage_status.attributes.has_outage | default(false) }}}}
-      icon: >
-        {{% if states.sensor.utility_outage_status.attributes.has_outage %}}
+      state: >-
+        {{{{ state_attr('sensor.utility_outage_status', 'has_outage') == true }}}}
+      icon: >-
+        {{% if state_attr('sensor.utility_outage_status', 'has_outage') == true %}}
           mdi:power-plug-off
         {{% else %}}
           mdi:power-plug
         {{% endif %}}
       attributes:
-        outage_type: >
-          {{{{ states.sensor.utility_outage_status.attributes.outage_type | default('Unknown') }}}}
-        last_check: >
-          {{{{ states.sensor.utility_outage_status.attributes.last_check | default('Never') }}}}
+        outage_type: >-
+          {{{{ state_attr('sensor.utility_outage_status', 'outage_type') | default('Unknown') }}}}
+        last_check: >-
+          {{{{ state_attr('sensor.utility_outage_status', 'last_check') | default('Never') }}}}
+        details: >-
+          {{{{ state_attr('sensor.utility_outage_status', 'details') | default([]) }}}}
 """
 
             # Write to /config directory for direct include
