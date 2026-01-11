@@ -1,5 +1,11 @@
 <!-- https://developers.home-assistant.io/docs/add-ons/presentation#keeping-a-changelog -->
 
+## 1.1.3
+
+- Fix beautifulsoup4 installation issue
+- Install lxml via apk for better compatibility
+- Remove pip install fallback that was masking errors
+
 ## 1.1.2
 
 - Fix build issues with Dockerfile

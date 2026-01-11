@@ -7,11 +7,10 @@ RUN \
     apk add --no-cache \
         python3 \
         py3-pip \
-    && pip3 install --break-system-packages \
+        py3-lxml \
+    && pip3 install --break-system-packages --no-cache-dir \
         requests \
-        beautifulsoup4 \
-        lxml \
-    || true
+        beautifulsoup4
 
 # Copy root filesystem
 COPY rootfs /
@@ -27,6 +26,7 @@ LABEL \
     io.hass.name="Bulgarian Utility Outage Checker" \
     io.hass.description="Check for utility outages in Bulgaria" \
     io.hass.type="addon" \
-    io.hass.version="1.1.2"
+    io.hass.version="1.1.3"
+
 
 
