@@ -24,16 +24,18 @@ _Проверка за аварии на комунални услуги в Бъ
 Currently supports:
 - **ERM West** (ЕРМ Запад) - Electricity distribution company
 
-## Features
+## Features / Възможности
 
-- 🔄 **Automatic updates** - Home Assistant checks for new versions daily
-- 📊 Periodic checking for utility outages
-- ⏱️ Configurable check interval (1 minute to 1 hour)
-- 🔍 Support for custom identifiers (subscriber number, location, street)
-- 🌐 Bilingual interface (Bulgarian/English)
-- ⚙️ Auto-generated configuration for easy dashboard integration
-- 📁 JSON status file for Home Assistant sensors
-- 🔔 Binary sensor for automation triggers
+- 🔄 **Automatic updates** - Home Assistant checks for new versions daily / Автоматични актуализации
+- 📊 **Periodic monitoring** - Checks for outages based on your interval / Периодична проверка за аварии
+- ⏱️ **Configurable interval** - From 1 minute to 1 hour / Конфигурируем интервал от 1 минута до 1 час
+- 🔍 **Custom identifiers** - Subscriber number, location, or street / Поддръжка на идентификатори
+- 🌐 **Bilingual interface** - Bulgarian and English / Двуезичен интерфейс (БГ/EN)
+- ⚙️ **Auto-configuration** - Generates ready-to-use YAML files / Автоматично генериране на конфигурация
+- 📁 **JSON status file** - For advanced integrations / JSON файл със статус за сензори
+- 🔔 **Binary sensor** - For automation triggers / Binary sensor за автоматизации
+- 📈 **Detailed attributes** - Outage type, last check time, details / Детайлни атрибути
+- 🎨 **Dashboard ready** - Multiple card examples included / Готови примери за dashboard карти
 
 ## Installation / Инсталация
 
@@ -363,29 +365,221 @@ cards:
 - For automations, use `binary_sensor.avaria_na_tok_XXXXXXXXX` as trigger
 - Check [Home Assistant card documentation](https://www.home-assistant.io/dashboards/cards/) for more options
 
+---
+
+## Automations / Автоматизации
+
+Use the binary sensor to create automations that react to power outages.
+
+### 📱 Send notification on outage / Изпращане на нотификация при авария
+
+```yaml
+automation:
+  - alias: "Notify on Power Outage"
+    description: "Send notification when power outage is detected"
+    trigger:
+      - platform: state
+        entity_id: binary_sensor.avaria_na_tok_300062153834
+        to: "on"
+    action:
+      - service: notify.mobile_app_your_phone
+        data:
+          title: "⚠️ Авария на тока!"
+          message: >
+            {{ state_attr('binary_sensor.avaria_na_tok_300062153834', 'outage_type') }}
+            
+            Проверено: {{ state_attr('binary_sensor.avaria_na_tok_300062153834', 'last_check') }}
+          data:
+            priority: high
+            ttl: 0
+```
+
+### 🔔 Persistent notification / Постоянна нотификация
+
+```yaml
+automation:
+  - alias: "Persistent Notification on Outage"
+    trigger:
+      - platform: state
+        entity_id: binary_sensor.avaria_na_tok_300062153834
+        to: "on"
+    action:
+      - service: persistent_notification.create
+        data:
+          title: "🔴 Авария на електрозахранването"
+          message: >
+            **Тип:** {{ state_attr('binary_sensor.avaria_na_tok_300062153834', 'outage_type') }}
+            
+            **Проверено:** {{ state_attr('binary_sensor.avaria_na_tok_300062153834', 'last_check') }}
+          notification_id: power_outage
+          
+  - alias: "Clear Notification on Recovery"
+    trigger:
+      - platform: state
+        entity_id: binary_sensor.avaria_na_tok_300062153834
+        to: "off"
+    action:
+      - service: persistent_notification.dismiss
+        data:
+          notification_id: power_outage
+```
+
+### 💡 Turn off devices on planned outage / Изключване на устройства при планирана авария
+
+```yaml
+automation:
+  - alias: "Turn off devices on planned outage"
+    trigger:
+      - platform: state
+        entity_id: binary_sensor.avaria_na_tok_300062153834
+        to: "on"
+    condition:
+      - condition: template
+        value_template: >
+          {{ 'Планирана' in state_attr('binary_sensor.avaria_na_tok_300062153834', 'outage_type') }}
+    action:
+      - service: light.turn_off
+        target:
+          entity_id: all
+      - service: switch.turn_off
+        target:
+          entity_id: 
+            - switch.ac_unit
+            - switch.water_heater
+      - service: notify.mobile_app_your_phone
+        data:
+          message: "Устройствата са изключени поради планирана авария."
+```
+
+### 🚨 Flash lights on unplanned outage / Мигане на светлини при непланирана авария
+
+```yaml
+automation:
+  - alias: "Alert on Unplanned Outage"
+    trigger:
+      - platform: state
+        entity_id: binary_sensor.avaria_na_tok_300062153834
+        to: "on"
+    condition:
+      - condition: template
+        value_template: >
+          {{ 'Непланирана' in state_attr('binary_sensor.avaria_na_tok_300062153834', 'outage_type') }}
+    action:
+      - repeat:
+          count: 3
+          sequence:
+            - service: light.turn_on
+              target:
+                entity_id: light.living_room
+              data:
+                brightness: 255
+                rgb_color: [255, 0, 0]
+            - delay:
+                seconds: 1
+            - service: light.turn_off
+              target:
+                entity_id: light.living_room
+            - delay:
+                seconds: 1
+      - service: notify.mobile_app_your_phone
+        data:
+          title: "🚨 НЕПЛАНИРАНА АВАРИЯ!"
+          message: "Непланирана авария на електрозахранването!"
+```
+
+### 📊 Log outages to file / Запис на аварии във файл
+
+```yaml
+automation:
+  - alias: "Log Power Outages"
+    trigger:
+      - platform: state
+        entity_id: binary_sensor.avaria_na_tok_300062153834
+        to: "on"
+    action:
+      - service: notify.outage_log
+        data:
+          message: >
+            {{ now().strftime('%Y-%m-%d %H:%M:%S') }} - 
+            {{ state_attr('binary_sensor.avaria_na_tok_300062153834', 'outage_type') }}
+```
+
+---
+
 ## Troubleshooting / Отстраняване на проблеми
 
-### Updates / Актуализации
-- Home Assistant automatically checks for updates daily
-- When a new version is available, you'll see an **Update** button in the add-on
-- Click **Update** to install the latest version
-- Home Assistant автоматично проверява за актуализации всеки ден
-- Когато има нова версия, ще видите бутон **Update** в добавката
-- Кликнете **Update** за да инсталирате най-новата версия
+### 🔄 Updates / Актуализации
+- Home Assistant automatically checks for updates daily / HA автоматично проверява за актуализации
+- When a new version is available, you'll see an **Update** button / При нова версия ще видите бутон **Update**
+- Click **Update** to install the latest version / Кликнете **Update** за инсталиране
+- Current version: **1.3.2** (January 2026)
 
-### Add-on not starting / Добавката не стартира
-- Check that you entered a valid identifier
-- Review logs in the **Log** tab
+### ❌ Add-on not starting / Добавката не стартира
+- Check that you entered a valid identifier / Проверете дали сте въвели валиден идентификатор
+- Review logs in the **Log** tab / Прегледайте логовете в раздел **Log**
+- Ensure identifier exists in ERM West system / Уверете се че идентификаторът съществува
 
-### Sensors not appearing / Сензорите не се показват
-- Ensure you added configuration to `configuration.yaml`
-- Restart Home Assistant after adding configuration
-- Check that file `/share/utility_outage_status.json` exists
+### 🔍 Sensors not appearing / Сензорите не се показват
+1. **Check configuration files exist:**
+   - Open File Editor → navigate to `/config/`
+   - Look for `utility_outage_sensors.yaml` and `utility_outage_templates.yaml`
+   - If missing, restart the add-on
 
-### No data updates / Данните не се обновяват
-- Check add-on logs for errors
-- Verify your identifier is correct for ERM West system
-- Ensure add-on is running (check **Info** tab)
+2. **Verify configuration.yaml:**
+   ```yaml
+   sensor: !include utility_outage_sensors.yaml
+   template: !include utility_outage_templates.yaml
+   ```
+
+3. **Restart Home Assistant:**
+   - Settings → System → Restart
+   - Wait 2-3 minutes for full restart
+
+4. **Check Developer Tools:**
+   - Go to Developer Tools → States
+   - Search for `sensor.utility_outage_status`
+   - Search for `binary_sensor.avaria_na_tok_`
+
+5. **Check logs for errors:**
+   - Settings → System → Logs
+   - Look for configuration errors
+
+### 🔧 Configuration conflicts / Конфликти в конфигурацията
+
+**If you already have `sensor:` section in configuration.yaml:**
+
+Option 1 - Use include_dir_merge_list:
+```yaml
+sensor: !include_dir_merge_list sensors/
+```
+Then move `utility_outage_sensors.yaml` to `/config/sensors/` folder.
+
+Option 2 - Merge manually:
+Open `utility_outage_sensors.yaml`, copy its content, and paste it under your existing `sensor:` section.
+
+**If you already have `template:` section:**
+
+Option 1 - Use include_dir_merge_list:
+```yaml
+template: !include_dir_merge_list templates/
+```
+Then move `utility_outage_templates.yaml` to `/config/templates/` folder.
+
+Option 2 - Merge manually:
+Open `utility_outage_templates.yaml`, copy its content, and paste it under your existing `template:` section.
+
+### 📊 No data updates / Данните не се обновяват
+- Check add-on logs for errors / Проверете логовете за грешки
+- Verify your identifier is correct for ERM West / Проверете идентификатора
+- Ensure add-on is running / Уверете се че добавката работи
+- Check if `/share/utility_outage_status.json` file exists and updates / Проверете дали файлът се обновява
+- Try restarting the add-on / Опитайте да рестартирате добавката
+
+### 🌐 Website connectivity issues / Проблеми със свързването към сайта
+- The add-on needs internet access to reach `info.ermzapad.bg`
+- Check your Home Assistant network settings
+- Verify firewall settings allow outbound connections
+- ERM West website may be temporarily down
 
 ## Support / Поддръжка
 
