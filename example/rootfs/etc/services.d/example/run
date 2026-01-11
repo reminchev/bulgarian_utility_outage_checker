@@ -1,0 +1,21 @@
+#!/usr/bin/with-contenv bashio
+# ==============================================================================
+# Start the Bulgarian Utility Outage Checker service
+# s6-overlay docs: https://github.com/just-containers/s6-overlay
+# ==============================================================================
+
+# Declare variables
+declare identifier
+declare check_interval
+
+## Get the configuration from user options
+identifier=$(bashio::config 'identifier')
+check_interval=$(bashio::config 'check_interval')
+
+## Log startup information
+bashio::log.info "Starting Bulgarian Utility Outage Checker..."
+bashio::log.info "Identifier: ${identifier}"
+bashio::log.info "Check interval: ${check_interval} seconds"
+
+## Run the Python outage checker
+exec python3 /usr/bin/outage_checker.py

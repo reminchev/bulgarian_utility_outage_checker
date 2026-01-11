@@ -1,0 +1,9 @@
+configuration:
+  identifier:
+    name: Identifier
+    description: >
+      Identifier of the object to check (subscriber number, location, street, address, etc.).
+      Examples: "Sofia, ul. Vitosha 25", "Pernik", "12345678"
+  check_interval:
+    name: Check Interval
+    description: How often to check for outages (in seconds). Minimum 60 seconds, maximum 3600 seconds (1 hour).
