@@ -15,4 +15,6 @@ options:
 schema:
   identifier: "str"
   check_interval: "int(60,3600)?"
-image: "ghcr.io/reminchev/{arch}-addon-bulgarian-utility-outage-checker"
+# Uncomment the line below for production builds
+# image: "ghcr.io/reminchev/{arch}-addon-bulgarian-utility-outage-checker"
+
