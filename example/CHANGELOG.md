@@ -1,5 +1,11 @@
 <!-- https://developers.home-assistant.io/docs/add-ons/presentation#keeping-a-changelog -->
 
+## 1.1.1
+
+- 🐛 Fixed Dockerfile build issues
+- 🔧 Improved Python package installation
+- 📦 Optimized dependencies
+
 ## 1.1.0
 
 - ✨ Added auto-generated configuration file for easy setup
@@ -17,5 +23,6 @@
 - Basic outage checking from ERM West
 - Configurable check interval
 - Support for custom identifiers
+
 
 
