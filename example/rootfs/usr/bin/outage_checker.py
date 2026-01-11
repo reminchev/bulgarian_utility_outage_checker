@@ -213,7 +213,17 @@ binary_sensor:
             
             logger.info(f"✅ Configuration snippet saved to {config_file}")
             logger.info(f"📂 File size: {os.path.getsize(config_file)} bytes")
-            logger.info(f"📝 To use: Copy content from {config_file} to your configuration.yaml")
+            
+            # Print the config to logs for easy copy-paste
+            logger.info("="*80)
+            logger.info("📋 COPY THE CONFIGURATION BELOW TO YOUR configuration.yaml:")
+            logger.info("="*80)
+            for line in config_snippet.split('\n'):
+                logger.info(line)
+            logger.info("="*80)
+            logger.info("💡 Restart Home Assistant after adding to configuration.yaml")
+            logger.info("="*80)
+            
         except Exception as e:
             logger.error(f"❌ Error generating config snippet: {e}")
             logger.error(f"Traceback: ", exc_info=True)
