@@ -204,12 +204,19 @@ binary_sensor:
 #     name: Последна проверка
 """
             config_file = '/share/utility_outage_config.yaml'
+            
+            # Ensure /share directory exists
+            os.makedirs('/share', exist_ok=True)
+            
             with open(config_file, 'w', encoding='utf-8') as f:
                 f.write(config_snippet)
             
-            logger.info(f"Configuration snippet saved to {config_file}")
+            logger.info(f"✅ Configuration snippet saved to {config_file}")
+            logger.info(f"📂 File size: {os.path.getsize(config_file)} bytes")
+            logger.info(f"📝 To use: Copy content from {config_file} to your configuration.yaml")
         except Exception as e:
-            logger.error(f"Error generating config snippet: {e}")
+            logger.error(f"❌ Error generating config snippet: {e}")
+            logger.error(f"Traceback: ", exc_info=True)
     
     def run(self):
         """Main loop for checking / Главен цикъл за проверка"""
