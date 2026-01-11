@@ -175,26 +175,30 @@ sensor:
       - last_check
       - timestamp
 
-binary_sensor:
-  - platform: template
-    sensors:
-      utility_outage:
-        friendly_name: "Авария на ток - {self.identifier}"
+# Modern template syntax (required for Home Assistant 2024+)
+template:
+  - binary_sensor:
+      - name: "Авария на ток - {self.identifier}"
         device_class: problem
-        value_template: >
+        state: >
           {{{{ states.sensor.utility_outage_status.attributes.has_outage | default(false) }}}}
-        icon_template: >
+        icon: >
           {{% if states.sensor.utility_outage_status.attributes.has_outage %}}
             mdi:power-plug-off
           {{% else %}}
             mdi:power-plug
           {{% endif %}}
+        attributes:
+          outage_type: >
+            {{{{ states.sensor.utility_outage_status.attributes.outage_type | default('Unknown') }}}}
+          last_check: >
+            {{{{ states.sensor.utility_outage_status.attributes.last_check | default('Never') }}}}
 
 # Dashboard Card Example:
 # type: entities
 # title: Статус на Електрозахранването
 # entities:
-#   - entity: binary_sensor.utility_outage
+#   - entity: binary_sensor.avariia_na_tok_{self.identifier.replace(' ', '_').lower()}
 #     name: Авария
 #   - entity: sensor.utility_outage_status
 #     name: Статус

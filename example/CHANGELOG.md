@@ -1,5 +1,10 @@
 <!-- https://developers.home-assistant.io/docs/add-ons/presentation#keeping-a-changelog -->
+## 1.2.0
 
+- ⚡ Updated to modern Home Assistant template syntax
+- 🔧 Fixed legacy binary_sensor template deprecation warning
+- ✨ Added attributes to binary sensor (outage_type, last_check)
+- 📝 Improved configuration generation
 ## 1.1.4
 
 - Use only Alpine packages (no pip) for maximum stability
