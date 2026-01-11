@@ -143,8 +143,73 @@ class OutageChecker:
                 json.dump(status_data, f, ensure_ascii=False, indent=2)
             
             logger.debug(f"Status saved to {self.status_file}")
+            
+            # Generate configuration snippet
+            self.generate_config_snippet()
         except Exception as e:
             logger.error(f"Error saving status to file / Грешка при запис на статус във файл: {e}")
+    
+    def generate_config_snippet(self):
+        """Генерира готов YAML snippet за configuration.yaml"""
+        try:
+            config_snippet = f"""# Bulgarian Utility Outage Checker Configuration
+# Copy this to your configuration.yaml file
+
+sensor:
+  - platform: file
+    name: "Utility Outage Status"
+    file_path: /share/utility_outage_status.json
+    value_template: >
+      {{% if value_json.state == 'ok' %}}
+        Няма аварии
+      {{% elif value_json.state == 'problem' %}}
+        {{{{ value_json.outage_type }}}}
+      {{% else %}}
+        Неизвестно
+      {{% endif %}}
+    json_attributes:
+      - identifier
+      - has_outage
+      - outage_type
+      - details
+      - last_check
+      - timestamp
+
+binary_sensor:
+  - platform: template
+    sensors:
+      utility_outage:
+        friendly_name: "Авария на ток - {self.identifier}"
+        device_class: problem
+        value_template: >
+          {{{{ states.sensor.utility_outage_status.attributes.has_outage | default(false) }}}}
+        icon_template: >
+          {{% if states.sensor.utility_outage_status.attributes.has_outage %}}
+            mdi:power-plug-off
+          {{% else %}}
+            mdi:power-plug
+          {{% endif %}}
+
+# Dashboard Card Example:
+# type: entities
+# title: Статус на Електрозахранването
+# entities:
+#   - entity: binary_sensor.utility_outage
+#     name: Авария
+#   - entity: sensor.utility_outage_status
+#     name: Статус
+#   - type: attribute
+#     entity: sensor.utility_outage_status
+#     attribute: last_check
+#     name: Последна проверка
+"""
+            config_file = '/share/utility_outage_config.yaml'
+            with open(config_file, 'w', encoding='utf-8') as f:
+                f.write(config_snippet)
+            
+            logger.info(f"Configuration snippet saved to {config_file}")
+        except Exception as e:
+            logger.error(f"Error generating config snippet: {e}")
     
     def run(self):
         """Main loop for checking / Главен цикъл за проверка"""

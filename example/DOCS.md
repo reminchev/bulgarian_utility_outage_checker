@@ -12,11 +12,29 @@ Currently supports ERM West EAD. It fetches information from the official websit
 
 ## How to use / Как да използвате
 
+### Quick Start / Бърз старт
+
 1. Install the add-on / Инсталирайте add-on-а
 2. Configure the identifier (subscriber number, location, or street) / Конфигурирайте идентификатора (номер на абонат, населено място или улица)
 3. (Optional) Set check interval in seconds / (Опционално) Задайте интервал на проверка в секунди
 4. Start the add-on / Стартирайте add-on-а
-5. Check logs for outage status / Проверете логовете за статус на аварии
+5. **Check `/share/utility_outage_config.yaml` for ready-to-use configuration!** / **Проверете `/share/utility_outage_config.yaml` за готова конфигурация!**
+
+### Adding to Dashboard / Добавяне към таблото
+
+The add-on automatically generates configuration in `/share/utility_outage_config.yaml`.
+
+**Easy Method / Лесен метод:**
+1. Open File Editor add-on or access via SSH
+2. Copy content from `/share/utility_outage_config.yaml`
+3. Paste into your `configuration.yaml`
+4. Restart Home Assistant
+5. Add sensors to your dashboard
+
+**The configuration file includes / Файлът включва:**
+- ✅ Sensor definition / Дефиниция на сензор
+- ✅ Binary sensor for outage detection / Binary сензор за детекция на авария
+- ✅ Dashboard card examples / Примери за dashboard карти
 
 ## Configuration / Конфигурация
 
