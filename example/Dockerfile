@@ -3,24 +3,30 @@ ARG BUILD_FROM
 FROM $BUILD_FROM
 
 # Install Python and required packages
-RUN apk add --no-cache \
-    python3 \
-    py3-pip \
-    && pip3 install --no-cache-dir --break-system-packages \
-    requests \
-    beautifulsoup4 \
-    lxml
-
-# Execute during the build of the image
-ARG TEMPIO_VERSION BUILD_ARCH
 RUN \
-    curl -sSLf -o /usr/bin/tempio \
-    "https://github.com/home-assistant/tempio/releases/download/${TEMPIO_VERSION}/tempio_${BUILD_ARCH}" \
-    && chmod a+x /usr/bin/tempio
+    apk add --no-cache \
+        python3 \
+        py3-pip \
+    && pip3 install --break-system-packages \
+        requests \
+        beautifulsoup4 \
+        lxml \
+    || true
 
 # Copy root filesystem
 COPY rootfs /
 
-# Make Python script executable
-RUN chmod +x /usr/bin/outage_checker.py
+# Make scripts executable
+RUN \
+    chmod a+x /etc/services.d/example/run \
+    && chmod a+x /etc/services.d/example/finish \
+    && chmod a+x /usr/bin/outage_checker.py
+
+# Labels
+LABEL \
+    io.hass.name="Bulgarian Utility Outage Checker" \
+    io.hass.description="Check for utility outages in Bulgaria" \
+    io.hass.type="addon" \
+    io.hass.version="1.1.2"
+
 

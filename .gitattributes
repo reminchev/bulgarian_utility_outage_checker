@@ -1,0 +1,5 @@
+* text=auto
+*.sh text eol=lf
+*.py text eol=lf
+example/rootfs/etc/services.d/example/run text eol=lf
+example/rootfs/etc/services.d/example/finish text eol=lf

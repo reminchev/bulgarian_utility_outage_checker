@@ -1,8 +1,8 @@
 # https://developers.home-assistant.io/docs/add-ons/configuration#add-on-config
-name: Bulgarian Utility Outage Checker / Проверка за Аварии На комуннални услуги в България
-version: "1.1.1"
+name: Bulgarian Utility Outage Checker
+version: "1.1.2"
 slug: bulgarian_utility_outage_checker
-description: Checks for planned and unplanned power outages from ERM West / Проверява за планирани и аварийни прекъсвания на електрозахранването
+description: Check for planned and unplanned utility outages in Bulgaria
 url: "https://github.com/reminchev/bulgarian_utility_outage_checker"
 arch:
   - aarch64
@@ -17,5 +17,6 @@ schema:
   check_interval: "int(60,3600)?"
 # Uncomment the line below for production builds
 # image: "ghcr.io/reminchev/{arch}-addon-bulgarian-utility-outage-checker"
+
 
 

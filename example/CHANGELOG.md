@@ -1,10 +1,17 @@
 <!-- https://developers.home-assistant.io/docs/add-ons/presentation#keeping-a-changelog -->
 
+## 1.1.2
+
+- Fix build issues with Dockerfile
+- Optimize Python package installation
+- Add .gitattributes for proper line endings
+- Simplify config metadata to avoid encoding issues
+
 ## 1.1.1
 
-- 🐛 Fixed Dockerfile build issues
-- 🔧 Improved Python package installation
-- 📦 Optimized dependencies
+- Fixed Dockerfile build issues
+- Improved Python package installation
+- Optimized dependencies
 
 ## 1.1.0
 
