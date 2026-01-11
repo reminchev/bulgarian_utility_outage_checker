@@ -1,15 +1,21 @@
 <!-- https://developers.home-assistant.io/docs/add-ons/presentation#keeping-a-changelog -->
 
-## 1.2.0
-
-- Add an apparmor profile
-- Update to 3.15 base image with s6 v3
-- Add a sample script to run as service and constrain in aa profile
-
 ## 1.1.0
 
-- Updates
+- ✨ Added auto-generated configuration file for easy setup
+- ✨ JSON status export for Home Assistant sensors integration
+- 📝 Comprehensive usage documentation in README
+- 🎨 Custom logo and icon with Bulgarian map
+- 🌐 Full bilingual support (Bulgarian/English)
+- 🔧 Dashboard integration with ready-to-use examples
+- 📊 Binary sensor for outage detection
+- 🔄 Automatic configuration snippet generation
 
 ## 1.0.0
 
 - Initial release
+- Basic outage checking from ERM West
+- Configurable check interval
+- Support for custom identifiers
+
+

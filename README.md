@@ -26,12 +26,14 @@ Currently supports:
 
 ## Features
 
-- Periodic checking for utility outages
-- Configurable check interval (1 minute to 1 hour)
-- Support for custom identifiers (subscriber number, location, street)
-- Bilingual interface (Bulgarian/English)
-- Auto-generated configuration for easy dashboard integration
-- JSON status file for Home Assistant sensors
+- 🔄 **Automatic updates** - Home Assistant checks for new versions daily
+- 📊 Periodic checking for utility outages
+- ⏱️ Configurable check interval (1 minute to 1 hour)
+- 🔍 Support for custom identifiers (subscriber number, location, street)
+- 🌐 Bilingual interface (Bulgarian/English)
+- ⚙️ Auto-generated configuration for easy dashboard integration
+- 📁 JSON status file for Home Assistant sensors
+- 🔔 Binary sensor for automation triggers
 
 ## Installation / Инсталация
 
@@ -160,6 +162,14 @@ entities:
 ```
 
 ## Troubleshooting / Отстраняване на проблеми
+
+### Updates / Актуализации
+- Home Assistant automatically checks for updates daily
+- When a new version is available, you'll see an **Update** button in the add-on
+- Click **Update** to install the latest version
+- Home Assistant автоматично проверява за актуализации всеки ден
+- Когато има нова версия, ще видите бутон **Update** в добавката
+- Кликнете **Update** за да инсталирате най-новата версия
 
 ### Add-on not starting / Добавката не стартира
 - Check that you entered a valid identifier
