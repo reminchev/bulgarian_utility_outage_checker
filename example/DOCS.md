@@ -1,5 +1,7 @@
 # Home Assistant Add-on: Bulgarian Utility Outage Checker
 
+![Logo](logo.png)
+
 ## Description / Описание
 
 This add-on checks for planned and unplanned utility outages in Bulgaria.
