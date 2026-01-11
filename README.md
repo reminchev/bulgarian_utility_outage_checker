@@ -72,23 +72,37 @@ Or click this button:
 4. Click **Save**
 5. Go to **Info** tab and click **Start**
 
-### Step 4: Add to Dashboard / Стъпка 4: Добавяне към таблото
+### Step 4: Configure Home Assistant / Стъпка 4: Конфигурация на Home Assistant
 
-#### Automatic Configuration / Автоматична конфигурация
+#### ✨ Automatic Configuration (Recommended) / ✨ Автоматична конфигурация (Препоръчително)
 
-The add-on automatically generates a ready-to-use configuration file!
+The add-on **automatically generates** ready-to-use configuration files!
 
-1. After starting the add-on, open **File Editor** add-on (or access via SSH/Samba)
-2. Navigate to `/share/utility_outage_config.yaml`
-3. **Copy the entire content** of this file
-4. Open your `configuration.yaml` file
-5. **Paste** the copied configuration at the end
-6. Go to **Settings** → **System** → **Restart Home Assistant**
+1. **Start the add-on** - it will create two files:
+   - `/config/utility_outage_sensors.yaml` - File sensor configuration
+   - `/config/utility_outage_templates.yaml` - Binary sensor template configuration
 
-#### Manual Configuration / Ръчна конфигурация
+2. **Open your `configuration.yaml`** (Settings → Add-ons → File Editor)
 
-Add this to your `configuration.yaml`:
+3. **Add these two lines** to your `configuration.yaml`:
+   ```yaml
+   sensor: !include utility_outage_sensors.yaml
+   template: !include utility_outage_templates.yaml
+   ```
 
+   **Note:** If you already have `sensor:` or `template:` sections in your configuration, see the logs for instructions on how to merge them.
+
+4. **Save** and go to **Settings** → **System** → **Restart Home Assistant**
+
+5. After restart, check **Developer Tools** → **States** for:
+   - `sensor.utility_outage_status` 
+   - `binary_sensor.avaria_na_tok_XXXXXXXXX` (where X is your identifier)
+
+#### 📝 Manual Configuration / 📝 Ръчна конфигурация
+
+If you prefer to add sensors manually or need to customize:
+
+**File Sensor** (monitors status file):
 ```yaml
 sensor:
   - platform: file
@@ -109,57 +123,245 @@ sensor:
       - details
       - last_check
       - timestamp
+```
 
-binary_sensor:
-  - platform: template
-    sensors:
-      utility_outage:
-        friendly_name: "Авария на ток"
+**Binary Sensor Template** (for automations):
+```yaml
+template:
+  - binary_sensor:
+      - name: "Авария на ток - 300062153834"
         device_class: problem
-        value_template: >
-          {{ states.sensor.utility_outage_status.attributes.has_outage | default(false) }}
-        icon_template: >
-          {% if states.sensor.utility_outage_status.attributes.has_outage %}
+        state: >-
+          {{ state_attr('sensor.utility_outage_status', 'has_outage') == true }}
+        icon: >-
+          {% if state_attr('sensor.utility_outage_status', 'has_outage') == true %}
             mdi:power-plug-off
           {% else %}
             mdi:power-plug
           {% endif %}
+        attributes:
+          outage_type: >-
+            {{ state_attr('sensor.utility_outage_status', 'outage_type') | default('Unknown') }}
+          last_check: >-
+            {{ state_attr('sensor.utility_outage_status', 'last_check') | default('Never') }}
+          details: >-
+            {{ state_attr('sensor.utility_outage_status', 'details') | default([]) }}
 ```
+
+**Important:** Replace `300062153834` with your identifier.
 
 Restart Home Assistant after adding the configuration.
 
-### Step 5: Create Dashboard Card / Стъпка 5: Създаване на карта
+### Step 5: Create Dashboard Card / Стъпка 5: Създаване на карта за таблото
 
-1. Go to your dashboard / Отидете на вашето табло
-2. Click **Edit Dashboard** → **Add Card**
-3. Choose **Entities Card**
-4. Add these entities:
+After sensors are created, add them to your dashboard. Here are several card examples:
+
+#### 🎴 Simple Entities Card / Проста Entities карта
+
+Shows all information in a clean list format.
 
 ```yaml
 type: entities
 title: Статус на Електрозахранването
 entities:
-  - entity: binary_sensor.utility_outage
-    name: Авария
   - entity: sensor.utility_outage_status
     name: Статус
+    icon: mdi:transmission-tower
   - type: attribute
     entity: sensor.utility_outage_status
     attribute: last_check
     name: Последна проверка
+    icon: mdi:clock-outline
+  - entity: binary_sensor.avaria_na_tok_300062153834
+    name: Авария детектирана
 ```
 
-Or use a **Glance Card** for compact view:
+**Screenshot:**
+```
+┌─────────────────────────────────────┐
+│ Статус на Електрозахранването       │
+├─────────────────────────────────────┤
+│ 🗼 Статус: Няма аварии              │
+│ 🕐 Последна проверка: 11:30         │
+│ ⚡ Авария детектирана: off          │
+└─────────────────────────────────────┘
+```
+
+#### 📊 Detailed Entities Card with Attributes / Детайлна карта с атрибути
+
+Shows more information including outage type.
+
+```yaml
+type: entities
+title: 🔌 ЕРМ Запад - Мониторинг
+entities:
+  - entity: binary_sensor.avaria_na_tok_300062153834
+    name: Статус на електрозахранването
+    secondary_info: last-changed
+  - type: attribute
+    entity: binary_sensor.avaria_na_tok_300062153834
+    attribute: outage_type
+    name: Тип на аварията
+  - type: attribute
+    entity: binary_sensor.avaria_na_tok_300062153834
+    attribute: last_check
+    name: Последна проверка
+  - type: divider
+  - entity: sensor.utility_outage_status
+    name: Детайлен статус
+```
+
+#### 🎯 Glance Card (Compact) / Компактна Glance карта
+
+Perfect for small spaces or mobile view.
 
 ```yaml
 type: glance
 title: Електрозахранване
+columns: 2
 entities:
-  - entity: binary_sensor.utility_outage
+  - entity: binary_sensor.avaria_na_tok_300062153834
     name: Авария
   - entity: sensor.utility_outage_status
     name: Статус
 ```
+
+**Screenshot:**
+```
+┌───────────────────────────┐
+│  Електрозахранване        │
+├─────────────┬─────────────┤
+│    ⚡       │    ✓        │
+│  Авария    │  Статус     │
+│    off     │ Няма аварии │
+└─────────────┴─────────────┘
+```
+
+#### 🚨 Alert Card (Conditional) / Карта за предупреждения
+
+Only shows when there's an outage.
+
+```yaml
+type: conditional
+conditions:
+  - condition: state
+    entity: binary_sensor.avaria_na_tok_300062153834
+    state: 'on'
+card:
+  type: markdown
+  content: >
+    ## ⚠️ АВАРИЯ НА ЕЛЕКТРОЗАХРАНВАНЕТО!
+
+    **Тип:** {{ state_attr('binary_sensor.avaria_na_tok_300062153834', 'outage_type') }}
+
+    **Последна проверка:** {{ state_attr('binary_sensor.avaria_na_tok_300062153834', 'last_check') }}
+    
+    ---
+    
+    _Информацията се обновява автоматично всеки час._
+  title: 🔴 Внимание!
+  theme: red
+```
+
+#### 📈 Markdown Card with Status / Markdown карта със статус
+
+Customizable card with formatted information.
+
+```yaml
+type: markdown
+content: >
+  ## 🔌 Статус на Електрозахранването
+
+
+  {% if is_state('binary_sensor.avaria_na_tok_300062153834', 'on') %}
+
+  ### ⚠️ {{ state_attr('binary_sensor.avaria_na_tok_300062153834', 'outage_type') }}
+
+  **Статус:** 🔴 Има авария
+
+  {% else %}
+
+  ### ✅ Няма аварии
+
+  **Статус:** 🟢 Нормално захранване
+
+  {% endif %}
+
+
+  ---
+
+  **Последна проверка:** {{ state_attr('binary_sensor.avaria_na_tok_300062153834', 'last_check') | default('Никога') }}
+
+  **Идентификатор:** {{ state_attr('sensor.utility_outage_status', 'identifier') }}
+title: ЕРМ Запад - Мониторинг
+```
+
+#### 🎨 Button Card (Custom) / Персонализирана Button карта
+
+Requires [button-card](https://github.com/custom-cards/button-card) custom component.
+
+```yaml
+type: custom:button-card
+entity: binary_sensor.avaria_na_tok_300062153834
+name: Електрозахранване
+show_state: true
+show_last_changed: true
+state:
+  - value: 'on'
+    color: red
+    icon: mdi:power-plug-off
+    name: АВАРИЯ
+  - value: 'off'
+    color: green
+    icon: mdi:power-plug
+    name: Нормално
+styles:
+  card:
+    - font-size: 14px
+    - height: 120px
+  name:
+    - font-weight: bold
+    - font-size: 16px
+tap_action:
+  action: more-info
+```
+
+#### 📱 Stack Card (Combined Layout) / Комбинирана карта
+
+Combines multiple card types in one.
+
+```yaml
+type: vertical-stack
+cards:
+  - type: glance
+    title: 🔌 ЕРМ Запад
+    entities:
+      - entity: binary_sensor.avaria_na_tok_300062153834
+        name: Статус
+  - type: conditional
+    conditions:
+      - condition: state
+        entity: binary_sensor.avaria_na_tok_300062153834
+        state: 'on'
+    card:
+      type: markdown
+      content: >
+        ⚠️ **{{ state_attr('binary_sensor.avaria_na_tok_300062153834', 'outage_type') }}**
+        
+        Проверено: {{ state_attr('binary_sensor.avaria_na_tok_300062153834', 'last_check') }}
+  - type: entities
+    entities:
+      - entity: sensor.utility_outage_status
+        name: Детайлен статус
+```
+
+---
+
+**💡 Tips / Съвети:**
+- Replace `300062153834` with your actual identifier in the entity names
+- You can customize colors, icons, and text in any card
+- For automations, use `binary_sensor.avaria_na_tok_XXXXXXXXX` as trigger
+- Check [Home Assistant card documentation](https://www.home-assistant.io/dashboards/cards/) for more options
 
 ## Troubleshooting / Отстраняване на проблеми
 
